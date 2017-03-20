@@ -99,7 +99,7 @@ void MainWindow::on_scanPushButton_clicked()
     }
 }
 
-void MainWindow::currentDuplicateGroupsChanged(const QModelIndex &current, const QModelIndex &previous)
+void MainWindow::currentDuplicateGroupsChanged(const QModelIndex &current, const QModelIndex &)
 {
     int row = current.row();
     QStandardItem* item = m_duplicateGroupsModel->item(row, 0);

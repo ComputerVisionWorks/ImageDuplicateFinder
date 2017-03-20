@@ -13,7 +13,7 @@ void PictureLabel::setPixmap(const QPixmap& picture)
     UpdateDisplayedPixmap();
 }
 
-void PictureLabel::resizeEvent(QResizeEvent *event)
+void PictureLabel::resizeEvent(QResizeEvent*)
 {
     UpdateDisplayedPixmap();
 }

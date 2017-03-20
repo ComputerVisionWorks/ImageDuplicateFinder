@@ -29,7 +29,7 @@ private slots:
 
     void on_scanPushButton_clicked();
 
-    void currentDuplicateGroupsChanged(const QModelIndex &current, const QModelIndex &previous);
+    void currentDuplicateGroupsChanged(const QModelIndex &current, const QModelIndex &);
 
     void on_imageListWidget_itemSelectionChanged();
 

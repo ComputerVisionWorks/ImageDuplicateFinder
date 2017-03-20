@@ -9,7 +9,7 @@ class PictureLabel : public QLabel
 public:
     PictureLabel(QWidget *parent);
     void setPixmap(const QPixmap& picture);
-    void resizeEvent(QResizeEvent *event);
+    void resizeEvent(QResizeEvent*);
 
 private:
     void UpdateDisplayedPixmap();
