@@ -15,14 +15,16 @@ SOURCES += main.cpp\
            dctperceptualhash.cpp \
            unionfind.cpp \
            picturelabel.cpp \
-           imageduplicategroups.cpp
+           imageduplicategroups.cpp \
+    imageduplicategroupsjsonexporter.cpp
 
 HEADERS  += mainwindow.h \
             imageduplicatefinder.h \
             dctperceptualhash.h \
             unionfind.h \
             picturelabel.h \
-            imageduplicategroups.h
+            imageduplicategroups.h \
+    imageduplicategroupsjsonexporter.h
 
 FORMS    += mainwindow.ui
 

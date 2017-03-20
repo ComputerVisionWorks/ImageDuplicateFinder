@@ -48,6 +48,8 @@ void ImageDuplicateFinder::ListImages(const QStringList &directories, bool explo
     emit progressRangeChanged(0, 0);
     emit progressValueChanged(0);
 
+    m_duplicateGroups.directories = directories;
+
     m_imagesFutureWatcher.setFuture(QtConcurrent::run(this, &ImageDuplicateFinder::ListImagesInDirectory, directories, exploreSubDirectories));
 }
 

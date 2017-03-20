@@ -204,7 +204,7 @@
      <item>
       <widget class="QPushButton" name="exportDuplicateGroupsPushButton">
        <property name="text">
-        <string>Export</string>
+        <string>JSON Export</string>
        </property>
       </widget>
      </item>

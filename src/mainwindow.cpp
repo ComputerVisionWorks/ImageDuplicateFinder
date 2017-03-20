@@ -1,8 +1,9 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-
 #include <QFileDialog>
 #include <QMessageBox>
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "imageduplicategroupsjsonexporter.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -133,5 +134,20 @@ void MainWindow::on_imageListWidget_itemSelectionChanged()
 
 void MainWindow::on_exportDuplicateGroupsPushButton_clicked()
 {
-    QFileDialog::getSaveFileName(this, "Save duplicate groups");
+    QString saveFilePath = QFileDialog::getSaveFileName(this, "Save duplicate groups");
+
+    if (!saveFilePath.isEmpty())
+    {
+        ImageDuplicateGroupsJsonExporter exporter(&m_duplicateGroups);
+
+        bool saveResult = exporter.save(saveFilePath);
+
+        if (!saveResult) {
+            QMessageBox::critical(this, "Save error", "Couldn't export the data.");
+        }
+    }
+    else
+    {
+        QMessageBox::warning(this, "No save file", "You should select a save file.");
+    }
 }

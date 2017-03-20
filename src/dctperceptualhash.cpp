@@ -2,7 +2,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <QDebug>
+#include <QtGlobal>
+#include <QtDebug>
 
 #include "dctperceptualhash.h"
 
@@ -21,7 +22,7 @@ quint64 DctPerceptualHash(const QString& file_path)
 
     if (input.data == NULL || (input.type() != CV_8UC3 && input.type() != CV_8U)) {
         // If there is a reading error, return a null hash.
-        qDebug() << "Error reading file: " << file_path;
+        qWarning() << "Error reading file: " << file_path;
         return 0;
     }
 
