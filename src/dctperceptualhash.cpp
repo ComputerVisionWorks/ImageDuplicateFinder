@@ -5,6 +5,8 @@
 #include <QtGlobal>
 #include <QtDebug>
 
+#include <nmmintrin.h>
+
 #include "dctperceptualhash.h"
 
 quint64 DctPerceptualHash(const QString& file_path)
@@ -69,5 +71,9 @@ quint64 DctPerceptualHash(const QString& file_path)
 
 int DctPerceptualHashDistance(quint64 x, quint64 y)
 {
+#if defined(__GNUC__) || defined(__GNUG__)
     return __builtin_popcountll(x ^ y);
+#elif defined(_MSC_VER)
+    return _mm_popcnt_u64(x ^ y);
+#endif
 }

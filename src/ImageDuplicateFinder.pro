@@ -41,3 +41,24 @@ unix:!mac {
 
     QMAKE_CXXFLAGS_RELEASE += -O3 -march=native
 }
+
+## OpenCV settings for Windows and OpenCV 3.2.0
+win32 {
+    message("Using settings for Windows.")
+
+    OPENCV_PATH = "C:\\Program Files\\opencv"
+
+    INCLUDEPATH += $${OPENCV_PATH}"\\build\\include" \
+                   $${OPENCV_PATH}"\\build\\include\\opencv" \
+                   $${OPENCV_PATH}"\\build\\include\\opencv2"
+
+    CONFIG(debug, debug | release) {
+        LIBS += -L$${OPENCV_PATH}"\\build\\x64\\vc14\\lib" \
+                -lopencv_world320d
+    }
+
+    CONFIG(release, debug | release) {
+        LIBS += -L$${OPENCV_PATH}"\\build\\x64\\vc14\\lib" \
+                -lopencv_world320
+    }
+}
