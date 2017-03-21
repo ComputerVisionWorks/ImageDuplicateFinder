@@ -16,7 +16,7 @@ SOURCES += main.cpp\
            unionfind.cpp \
            picturelabel.cpp \
            imageduplicategroups.cpp \
-    imageduplicategroupsjsonexporter.cpp
+           imageduplicategroupsjsonexporter.cpp
 
 HEADERS  += mainwindow.h \
             imageduplicatefinder.h \
@@ -24,7 +24,7 @@ HEADERS  += mainwindow.h \
             unionfind.h \
             picturelabel.h \
             imageduplicategroups.h \
-    imageduplicategroupsjsonexporter.h
+            imageduplicategroupsjsonexporter.h
 
 FORMS    += mainwindow.ui
 
@@ -39,7 +39,7 @@ unix:!mac {
             -lopencv_imgproc  \
             -lopencv_imgcodecs
 
-    QMAKE_CXXFLAGS_RELEASE += -O3 -march=native
+    QMAKE_CXXFLAGS_RELEASE += -march=native
 }
 
 ## OpenCV settings for Windows and OpenCV 3.2.0
