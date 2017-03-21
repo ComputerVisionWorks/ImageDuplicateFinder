@@ -18,16 +18,15 @@ public:
     virtual ~ImageDuplicateFinder();
 
     /**
-     * @brief images Return the images considered for the duplicate check.
-     * @return A list of the images
+     * @brief DEFAULT_THRESHOLD Default value for threshold.
      */
-    const QStringList& images() const { return m_duplicateGroups.images; }
+    static const int DEFAULT_THRESHOLD = 10;
 
     /**
-     * @brief duplicates Return the duplicates among the images. The result is available only after the finished() signal is emitted.
-     * @return A list of all indexes of the duplicates.
+     * @brief threshold Return the threshold value.
+     * @return The threshold value.
      */
-    const QList<QVector<int> >& duplicates() const { return m_duplicateGroups.duplicateGroups; }
+    int threshold() const { return m_threshold; }
 
     /**
      * @brief duplicateGroups Return the duplicates among the images. The result is available only after the finished() signal is emitted.
@@ -68,6 +67,12 @@ signals:
     void progressValueChanged(int progressValue);
 
 public slots:
+    /**
+     * @brief setThreshold Set the threshold value.
+     * @param threshold The new threshold value.
+     */
+    void setThreshold(int threshold) { m_threshold = threshold; }
+
     /**
      * @brief cancel Cancel the asynchronous computation.
      */
@@ -112,9 +117,9 @@ private:
     static const QStringList IMG_FORMATS;
 
     /**
-     * @brief THRESHOLD The threshold used to decide if two images are similar.
+     * @brief m_threshold The threshold used to decide if two images are similar.
      */
-    const int THRESHOLD;
+    int m_threshold;
 
     ImageDuplicateGroups m_duplicateGroups;
 

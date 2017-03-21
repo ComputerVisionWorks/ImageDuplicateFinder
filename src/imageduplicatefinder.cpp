@@ -10,7 +10,7 @@
 
 const QStringList ImageDuplicateFinder::IMG_FORMATS = {"*.jpg", "*.png"};
 
-ImageDuplicateFinder::ImageDuplicateFinder(QObject *parent) : QObject(parent), THRESHOLD(8)
+ImageDuplicateFinder::ImageDuplicateFinder(QObject *parent) : QObject(parent), m_threshold(DEFAULT_THRESHOLD)
 {
     // When the ListImages task finishes, call the ListImagesEnd slot.
     QObject::connect(&m_imagesFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &ImageDuplicateFinder::ListImagesEnd);
@@ -111,7 +111,7 @@ QList<QVector<int> > ImageDuplicateFinder::FindDuplicatesInHashes() const {
 
     for (int i = 0; i < m_hashes.size(); i++) {
         for (int j = i + 1; j < m_hashes.size(); j++) {
-            if (DctPerceptualHashDistance(m_hashes[i], m_hashes[j]) <= THRESHOLD) {
+            if (DctPerceptualHashDistance(m_hashes[i], m_hashes[j]) <= m_threshold) {
                 union_find.Union(i, j);
             }
         }

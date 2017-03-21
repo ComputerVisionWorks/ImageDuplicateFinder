@@ -1,3 +1,4 @@
+#include <QtGlobal>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -14,6 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_duplicateFinder = new ImageDuplicateFinder();
 
     QObject::connect(m_duplicateFinder, &ImageDuplicateFinder::finished, this, &MainWindow::displayResults);
+
+    ui->thresholdSpinBox->setValue(m_duplicateFinder->threshold());
+    QObject::connect(ui->thresholdSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), m_duplicateFinder, &ImageDuplicateFinder::setThreshold);
+
 
     m_duplicateGroupsModel = new QStandardItemModel(this);
     m_duplicateGroupsModel->setColumnCount(2);
