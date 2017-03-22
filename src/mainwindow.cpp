@@ -46,7 +46,10 @@ void MainWindow::displayResults() {
         QList<QStandardItem*> row;
 
         row.append(new QStandardItem(m_duplicateGroups.groupImage(i, 0)));
-        row.append(new QStandardItem(QString::number(m_duplicateGroups.groupSize(i))));
+
+        QStandardItem* countItem = new QStandardItem;
+        countItem->setData(m_duplicateGroups.groupSize(i), Qt::DisplayRole);
+        row.append(countItem);
 
         m_duplicateGroupsModel->appendRow(row);
     }
