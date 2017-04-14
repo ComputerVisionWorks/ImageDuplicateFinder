@@ -55,8 +55,14 @@ quint64 DctPerceptualHash(const QString& file_path)
 
     // Compute the median
     std::vector<float> coeffs(topLeftDCTCoeffs);
+
+    // The median of a 64 elements array is the mean between the 31th and the 32th element.
+    float median = 0;
     std::nth_element(coeffs.begin(), coeffs.begin() + coeffs.size()/2, coeffs.end());
-    float median = (coeffs[31] + coeffs[32])/2;
+    median += coeffs[coeffs.size()/2];
+    std::nth_element(coeffs.begin(), coeffs.begin() + coeffs.size()/2 - 1, coeffs.end());
+    median += coeffs[coeffs.size()/2 - 1];
+    median /= 2;
 
     // Transform into a 64 bits integer.
     for (unsigned int i = 0; i < topLeftDCTCoeffs.size(); i++) {
