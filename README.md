@@ -19,7 +19,8 @@ Search for near-duplicates in large image collections
 1. Open the project in Qt Creator and select the Microsoft Visual C++ 14 compiler
 2. Optionally change the OPENCV_PATH variable in ImageDuplicateFinder.pro
 3. Compile in Release mode
-4. Use windeployqt.exe on the binary file to retrieve the required runtime files
+4. Copy OpenCV dlls : opencv_world320.dll and opencv_ffmpeg320_64.dll
+5. Use windeployqt.exe on the binary file to retrieve the required runtime files
 
 ## Linux
 
