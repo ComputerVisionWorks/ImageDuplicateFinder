@@ -16,7 +16,9 @@ SOURCES += main.cpp\
            unionfind.cpp \
            picturelabel.cpp \
            imageduplicategroups.cpp \
-           imageduplicategroupsjsonexporter.cpp
+           imageduplicategroupsjsonexporter.cpp \
+    consoleapplication.cpp \
+    consoleprogressbar.cpp
 
 HEADERS  += mainwindow.h \
             imageduplicatefinder.h \
@@ -24,7 +26,9 @@ HEADERS  += mainwindow.h \
             unionfind.h \
             picturelabel.h \
             imageduplicategroups.h \
-            imageduplicategroupsjsonexporter.h
+            imageduplicategroupsjsonexporter.h \
+    consoleapplication.h \
+    consoleprogressbar.h
 
 FORMS    += mainwindow.ui
 
