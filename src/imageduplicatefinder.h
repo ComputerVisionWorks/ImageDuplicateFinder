@@ -15,8 +15,6 @@ class ImageDuplicateFinder : public QObject
 public:
     explicit ImageDuplicateFinder(QObject *parent = 0);
 
-    virtual ~ImageDuplicateFinder();
-
     /**
      * @brief DEFAULT_THRESHOLD Default value for threshold.
      */
@@ -83,33 +81,26 @@ public slots:
      */
     void reset();
 
-private slots:
-    void ListImagesEnd();
-
-    void ComputeHashImagesEnd();
-
-    void FindDuplicatesEnd();
-
 private:
-    void ListImages(const QStringList& directories, bool exploreSubDirectories);
-
-    void ComputeHashImages();
-
-    void FindDuplicates();
+    /**
+     * @brief Configure the QFutureWatchers
+     */
+    void ConfigureFutureWatchers();
 
     /**
      * @brief ListImagesInDirectory List all image files in a list of directories.
      * @param directories A list of directories.
      * @param exploreSubDirectories If true, also list image files recursively into subdirectories.
+     * @param img_formats Valid image formats.
      * @return
      */
-    QStringList ListImagesInDirectory(const QStringList& directories, bool exploreSubDirectories = false) const;
+    static QStringList ListImagesInDirectory(const QStringList& directories, bool exploreSubDirectories, const QStringList &img_formats);
 
     /**
      * @brief FindDuplicatesInHashes Find couples of duplicate hashes.
      * @return A list of all indexes of the duplicates.
      */
-    QList<QVector<int> > FindDuplicatesInHashes() const;
+    static QList<QVector<int> > FindDuplicatesInHashes(const std::vector<quint64> &hashes, int threshold);
 
     /**
      * @brief IMG_FORMATS Valid image formats.
@@ -123,13 +114,11 @@ private:
 
     ImageDuplicateGroups m_duplicateGroups;
 
-    QVector<quint64> m_hashes;
+    QFutureWatcher<QStringList> *m_imagesFutureWatcher;
 
-    QFutureWatcher<QStringList> m_imagesFutureWatcher;
+    QFutureWatcher<quint64> *m_hashFutureWatcher;
 
-    QFutureWatcher<quint64> m_hashFutureWatcher;
-
-    QFutureWatcher<QList<QVector<int> > > m_duplicatesFutureWatcher;
+    QFutureWatcher<QList<QVector<int> > > *m_duplicatesFutureWatcher;
 };
 
 #endif // IMAGEDUPLICATEFINDER_H

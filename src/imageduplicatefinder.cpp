@@ -12,80 +12,72 @@ const QStringList ImageDuplicateFinder::IMG_FORMATS = {"*.jpg", "*.png"};
 
 ImageDuplicateFinder::ImageDuplicateFinder(QObject *parent) : QObject(parent), m_threshold(DEFAULT_THRESHOLD)
 {
-    // When the ListImages task finishes, call the ListImagesEnd slot.
-    QObject::connect(&m_imagesFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &ImageDuplicateFinder::ListImagesEnd);
-    // When the ComputeHashImages task finishes, call the ComputeHashImagesEnd slot.
-    QObject::connect(&m_hashFutureWatcher, &QFutureWatcher<quint64>::finished, this, &ImageDuplicateFinder::ComputeHashImagesEnd);
-    // When the ComputeHashImages task reports progress, the signals are passed through.
-    QObject::connect(&m_hashFutureWatcher, &QFutureWatcher<quint64>::progressRangeChanged, this, &ImageDuplicateFinder::progressRangeChanged);
-    QObject::connect(&m_hashFutureWatcher, &QFutureWatcher<quint64>::progressValueChanged, this, &ImageDuplicateFinder::progressValueChanged);
-    // When the FindDuplicates task finishes, call the FindDuplicatesEnd slot.
-    QObject::connect(&m_duplicatesFutureWatcher, &QFutureWatcher<QList<QVector<int> > >::finished, this, &ImageDuplicateFinder::FindDuplicatesEnd);
-}
+    m_imagesFutureWatcher = new QFutureWatcher<QStringList>(this);
+    m_hashFutureWatcher = new QFutureWatcher<quint64>(this);
+    m_duplicatesFutureWatcher = new QFutureWatcher<QList<QVector<int> > >();
 
-ImageDuplicateFinder::~ImageDuplicateFinder() {
+    ConfigureFutureWatchers();
 }
 
 // Start the computation by listing all images
 void ImageDuplicateFinder::start(const QStringList& directories, bool exploreSubDirectories) {
-    ListImages(directories, exploreSubDirectories);
-}
-
-void ImageDuplicateFinder::cancel() {
-    m_imagesFutureWatcher.cancel();
-    m_hashFutureWatcher.cancel();
-    m_duplicatesFutureWatcher.cancel();
-    reset();
-}
-
-void ImageDuplicateFinder::reset() {
-    m_duplicateGroups.clear();
-    m_hashes.clear();
-}
-
-void ImageDuplicateFinder::ListImages(const QStringList &directories, bool exploreSubDirectories) {
     emit progressTextChanged("Listing images to analyse");
     emit progressRangeChanged(0, 0);
     emit progressValueChanged(0);
 
     m_duplicateGroups.directories = directories;
 
-    m_imagesFutureWatcher.setFuture(QtConcurrent::run(this, &ImageDuplicateFinder::ListImagesInDirectory, directories, exploreSubDirectories));
+    m_imagesFutureWatcher->setFuture(QtConcurrent::run(&ImageDuplicateFinder::ListImagesInDirectory, directories, exploreSubDirectories, IMG_FORMATS));
 }
 
-void ImageDuplicateFinder::ListImagesEnd() {
-    m_duplicateGroups.images = m_imagesFutureWatcher.result();
-
-    ComputeHashImages();
+void ImageDuplicateFinder::cancel() {
+    m_imagesFutureWatcher->cancel();
+    m_hashFutureWatcher->cancel();
+    m_duplicatesFutureWatcher->cancel();
+    reset();
 }
 
-void ImageDuplicateFinder::ComputeHashImages() {
-    emit progressTextChanged("Analysing images");
-
-    m_hashFutureWatcher.setFuture(QtConcurrent::mapped(m_duplicateGroups.images, DctPerceptualHash));
+void ImageDuplicateFinder::reset() {
+    m_duplicateGroups.clear();
 }
 
-void ImageDuplicateFinder::ComputeHashImagesEnd() {
-    m_hashes = m_hashFutureWatcher.future().results().toVector();
+void ImageDuplicateFinder::ConfigureFutureWatchers()
+{
+    // When the ListImages task finishes
+    auto onListImageFinished = [this]() {
+        m_duplicateGroups.images = m_imagesFutureWatcher->result();
 
-    FindDuplicates();
+        emit progressTextChanged("Analysing images");
+
+        m_hashFutureWatcher->setFuture(QtConcurrent::mapped(m_duplicateGroups.images, DctPerceptualHash));
+    };
+    QObject::connect(m_imagesFutureWatcher, &QFutureWatcher<QStringList>::finished, onListImageFinished);
+
+    // When the ComputeHashImages task finishes
+    auto onComputeHashImageFinished = [this]() {
+        std::vector<quint64> hashes = m_hashFutureWatcher->future().results().toVector().toStdVector();
+
+        emit progressTextChanged("Finding duplicates");
+        emit progressRangeChanged(0, 0);
+        emit progressValueChanged(0);
+
+        m_duplicatesFutureWatcher->setFuture(QtConcurrent::run(ImageDuplicateFinder::FindDuplicatesInHashes, hashes, m_threshold));
+    };
+    QObject::connect(m_hashFutureWatcher, &QFutureWatcher<quint64>::finished, onComputeHashImageFinished);
+    // When the ComputeHashImages task reports progress, the signals are passed through.
+    QObject::connect(m_hashFutureWatcher, &QFutureWatcher<quint64>::progressRangeChanged, this, &ImageDuplicateFinder::progressRangeChanged);
+    QObject::connect(m_hashFutureWatcher, &QFutureWatcher<quint64>::progressValueChanged, this, &ImageDuplicateFinder::progressValueChanged);
+
+    // When the FindDuplicates task finishes
+    auto onFindDuplicatesFinished = [this]() {
+        m_duplicateGroups.duplicateGroups = m_duplicatesFutureWatcher->future().result();
+
+        emit finished();
+    };
+    QObject::connect(m_duplicatesFutureWatcher, &QFutureWatcher<QList<QVector<int> > >::finished, onFindDuplicatesFinished);
 }
 
-void ImageDuplicateFinder::FindDuplicates() {
-    emit progressTextChanged("Finding duplicates");
-    emit progressRangeChanged(0, 0);
-    emit progressValueChanged(0);
-
-    m_duplicatesFutureWatcher.setFuture(QtConcurrent::run(this, &ImageDuplicateFinder::FindDuplicatesInHashes));
-}
-
-void ImageDuplicateFinder::FindDuplicatesEnd() {
-    m_duplicateGroups.duplicateGroups = m_duplicatesFutureWatcher.future().result();
-
-    emit finished();
-}
-
-QStringList ImageDuplicateFinder::ListImagesInDirectory(const QStringList& directories, bool exploreSubDirectories) const {
+QStringList ImageDuplicateFinder::ListImagesInDirectory(const QStringList& directories, bool exploreSubDirectories, const QStringList &img_formats) {
     QSet<QString> imagesSet;
 
     QDirIterator::IteratorFlags iteratorFlags = QDirIterator::NoIteratorFlags;
@@ -95,7 +87,7 @@ QStringList ImageDuplicateFinder::ListImagesInDirectory(const QStringList& direc
 
     // List all files in all directories.
     for (QStringList::const_iterator itDirPath = directories.begin(); itDirPath != directories.end(); ++itDirPath) {
-        QDirIterator itDir(*itDirPath, IMG_FORMATS, QDir::Files, iteratorFlags);
+        QDirIterator itDir(*itDirPath, img_formats, QDir::Files, iteratorFlags);
         while (itDir.hasNext()) {
             imagesSet.insert(itDir.next());
         }
@@ -104,22 +96,22 @@ QStringList ImageDuplicateFinder::ListImagesInDirectory(const QStringList& direc
     return imagesSet.toList();
 }
 
-QList<QVector<int> > ImageDuplicateFinder::FindDuplicatesInHashes() const {
+QList<QVector<int> > ImageDuplicateFinder::FindDuplicatesInHashes(const std::vector<quint64> &hashes, int threshold) {
     QList<QVector<int> > duplicates;
 
-    UnionFind union_find(m_hashes.size());
+    UnionFind union_find(hashes.size());
 
-    for (int i = 0; i < m_hashes.size(); i++) {
-        for (int j = i + 1; j < m_hashes.size(); j++) {
-            if (DctPerceptualHashDistance(m_hashes[i], m_hashes[j]) <= m_threshold) {
+    for (unsigned int i = 0; i < hashes.size(); i++) {
+        for (unsigned int j = i + 1; j < hashes.size(); j++) {
+            if (DctPerceptualHashDistance(hashes[i], hashes[j]) <= threshold) {
                 union_find.Union(i, j);
             }
         }
     }
 
     // List all non empty subsets indexed by root node.
-    std::vector<int> connected_comp_roots;
-    for (int i = 0; i < m_hashes.size(); i++) {
+    std::vector<unsigned int> connected_comp_roots;
+    for (unsigned int i = 0; i < hashes.size(); i++) {
         if ((union_find.Find(i) == i) && (union_find.Size(i) > 1)) {
             connected_comp_roots.push_back(i);
         }
@@ -127,19 +119,19 @@ QList<QVector<int> > ImageDuplicateFinder::FindDuplicatesInHashes() const {
     std::sort(connected_comp_roots.begin(), connected_comp_roots.end());
 
     // Add the roots to the connected components
-    for (unsigned int i = 0; i < connected_comp_roots.size(); i++) {
+    for (const unsigned int &connected_comp_root : connected_comp_roots) {
         // Add a QVector of size 1 whose unique value is i.
-        duplicates.append(QVector<int>(1, connected_comp_roots[i]));
+        duplicates.append(QVector<int>(1, connected_comp_root));
     }
 
     // Add every nodes to their connected components.
-    for (int i = 0; i < m_hashes.size(); i++) {
-        int root = union_find.Find(i);
+    for (unsigned int i = 0; i < hashes.size(); i++) {
+        unsigned int root = union_find.Find(i);
 
         // If the node is not a root.
         if (root != i) {
             // Search for his connected component.
-            std::vector<int>::iterator it;
+            std::vector<unsigned int>::iterator it;
             it = std::lower_bound(connected_comp_roots.begin(), connected_comp_roots.end(), root);
             if (it != connected_comp_roots.end()) {
                 int connected_comp = std::distance(connected_comp_roots.begin(), it);

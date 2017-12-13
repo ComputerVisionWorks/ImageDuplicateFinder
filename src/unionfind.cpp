@@ -1,10 +1,10 @@
 #include "unionfind.h"
 
-UnionFind::UnionFind(int nbNodes)
+UnionFind::UnionFind(unsigned int nbNodes)
 {
     _nodes.resize(nbNodes);
 
-    for (int i = 0;i < nbNodes;i++)
+    for (unsigned int i = 0;i < nbNodes;i++)
     {
         _nodes[i].parent = i;
         _nodes[i].rang = 0;
@@ -12,7 +12,7 @@ UnionFind::UnionFind(int nbNodes)
     }
 }
 
-int UnionFind::Find(int node)
+unsigned int UnionFind::Find(unsigned int node)
 {
     if (_nodes[node].parent != node)
     {
@@ -22,18 +22,18 @@ int UnionFind::Find(int node)
     return _nodes[node].parent;
 }
 
-int UnionFind::Size(int node)
+unsigned int UnionFind::Size(unsigned int node)
 {
-    int root = Find(node);
+    unsigned int root = Find(node);
 
     return _nodes[root].children;
 }
 
-int UnionFind::Union(int nodeX, int nodeY)
+unsigned int UnionFind::Union(unsigned int nodeX, unsigned int nodeY)
 {
-    int rootX = Find(nodeX);
-    int rootY = Find(nodeY);
-    int newRoot = rootX;
+    unsigned int rootX = Find(nodeX);
+    unsigned int rootY = Find(nodeY);
+    unsigned int newRoot = rootX;
 
     if (rootX != rootY)
     {

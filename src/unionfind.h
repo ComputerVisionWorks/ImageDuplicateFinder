@@ -8,20 +8,20 @@ using namespace std;
 class UnionFind
 {
 public:
-    UnionFind(int nbNodes);
+    UnionFind(unsigned int nbNodes);
     /**
      * @brief Find Return the root of a node.
      * @param node A node.
      * @return The root of the node.
      */
-    int Find(int node);
+    unsigned int Find(unsigned int node);
 
     /**
      * @brief Size Return the size of the subset in which a node is.
      * @param node A node.
      * @return The size of the subset in which the node is.
      */
-    int Size(int node);
+    unsigned int Size(unsigned int node);
 
     /**
      * @brief Union Unify two nodes.
@@ -29,14 +29,14 @@ public:
      * @param nodeY A node Y.
      * @return The new root of the two nodes.
      */
-    int Union(int nodeX, int nodeY);
+    unsigned int Union(unsigned int nodeX, unsigned int nodeY);
 
 private:
     struct Node
     {
-        int parent;
-        int rang;
-        int children;
+        unsigned int parent;
+        unsigned int rang;
+        unsigned int children;
     };
 
     vector<Node> _nodes;
