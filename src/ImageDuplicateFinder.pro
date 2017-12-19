@@ -46,7 +46,7 @@ unix:!mac {
     QMAKE_CXXFLAGS_RELEASE += -march=native
 }
 
-## OpenCV settings for Windows and OpenCV 3.2.0
+## OpenCV settings for Windows and OpenCV 3.3.1
 win32 {
     message("Using settings for Windows.")
 
@@ -58,11 +58,11 @@ win32 {
 
     CONFIG(debug, debug | release) {
         LIBS += -L$${OPENCV_PATH}"\\build\\x64\\vc14\\lib" \
-                -lopencv_world320d
+                -lopencv_world331d
     }
 
     CONFIG(release, debug | release) {
         LIBS += -L$${OPENCV_PATH}"\\build\\x64\\vc14\\lib" \
-                -lopencv_world320
+                -lopencv_world331
     }
 }
