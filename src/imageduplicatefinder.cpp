@@ -99,7 +99,9 @@ QStringList ImageDuplicateFinder::ListImagesInDirectory(const QStringList& direc
 QList<QVector<int> > ImageDuplicateFinder::FindDuplicatesInHashes(const std::vector<quint64> &hashes, int threshold) {
     QList<QVector<int> > duplicates;
 
-    UnionFind union_find(hashes.size());
+    const unsigned int nb_hashes = static_cast<unsigned int>(hashes.size());
+
+    UnionFind union_find(nb_hashes);
 
     for (unsigned int i = 0; i < hashes.size(); i++) {
         for (unsigned int j = i + 1; j < hashes.size(); j++) {
