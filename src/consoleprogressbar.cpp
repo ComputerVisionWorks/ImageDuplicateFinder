@@ -1,6 +1,8 @@
+#include "consoleprogressbar.h"
+
 #include <QTextStream>
 
-#include "consoleprogressbar.h"
+#include <cmath>
 
 ConsoleProgressBar::ConsoleProgressBar(QTextStream &out, QObject *parent) :
     QObject(parent),
@@ -45,7 +47,7 @@ void ConsoleProgressBar::Display() const
         if (BAR_WIDTH > 0)
         {
             m_out << "[";
-            int pos = int(round(BAR_WIDTH * progress));
+            int pos = int(std::round(BAR_WIDTH * progress));
             for (int i = 0; i < BAR_WIDTH; ++i) {
                 if (i < pos) {
                     m_out << "=";
